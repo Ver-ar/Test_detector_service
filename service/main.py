@@ -1,14 +1,3 @@
-<<<<<<< Updated upstream
-from fastapi import FastAPI, File
-
-import detect_faces
-
-def count_faces():
-    count_1 = detect_faces.count()
-    return count_1
-
-count_faces()
-=======
 from fastapi import FastAPI, File, Depends
 from requests.api import request
 from requests.sessions import Request
@@ -29,15 +18,10 @@ def get_db():
         yield db
     finally:
         db.close()
->>>>>>> Stashed changes
 
 app = FastAPI()
 
 @app.post('/images/')
-<<<<<<< Updated upstream
-async def create_item(image: bytes = File(...)) -> dict:
-    return {"image_id" : 1, "faces" : {count_1}}
-=======
 async def create_item(image: bytes = File(...), db: Session = Depends(get_db)) -> dict:
     #теперь create_image делает 2 действия: 
     faces = detect(image)
@@ -53,4 +37,3 @@ async def create_item(image: bytes = File(...), db: Session = Depends(get_db)) -
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="debug")
->>>>>>> Stashed changes
