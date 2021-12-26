@@ -5,9 +5,11 @@ from sqlalchemy.orm import Session
 import uvicorn
 
 from detect_faces import detect
-from write_value import create_image
+from write_value import create_image, get_image, del_image
+from count_value import count_image
 from models import Base
 from create_database import SessionLocal, engine
+
 
 
 Base.metadata.create_all(bind=engine) #запускаем базу данных на основе созданной в create_database.py базы данных с примененным видом "таблицы" из models.py
@@ -33,6 +35,21 @@ async def create_item(image: bytes = File(...), db: Session = Depends(get_db)) -
     
     return {"image_id" : db_image, "faces" : faces}
     # теперь image_id возвращает значение из бд, которое генерируется с autoincrement
+
+@app.get('/images/{image_id}')
+async def get_item(image_id: int, db: Session = Depends(get_db))-> dict:
+    db_image = get_image(db, id=id)
+    return {"image_id" : db_image}
+
+@app.delete('/images/{image_id}')
+async def del_item(image_id: int, db: Session = Depends(get_db))-> dict:
+    db_image = del_image(db, id=id)
+    return db_image
+
+@app.det('/images/count')
+async def del_item(image_id: int, faces: int, time: str, db: Session = Depends(get_db))-> dict:
+    db_image_count = count_image(db, id = id, faces = faces, time = time)
+    pass
 
 
 if __name__ == "__main__":
