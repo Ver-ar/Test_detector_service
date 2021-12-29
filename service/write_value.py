@@ -10,32 +10,24 @@ from sqlalchemy.sql import select
 
 
 def create_image(Session, faces: int):    
-    try:
-        with engine.begin() as conn:            
+    with engine.begin() as conn:            
             #ins = image_table.insert().values(faces='faces')
             #ins = conn.execute(image_table.select())
-            result = conn.execute(image_table.insert(),{"faces": faces}).inserted_primary_key 
+        result = conn.execute(image_table.insert(),{"faces": faces}).inserted_primary_key 
                                
-            print(f'В базу добавлено фото c id: {result[0]}')
-    except:
-        Session.rollback()
-        print('ralled back')
-        raise
-    finally:
-        Session.close()
+        print(f'В базу добавлено фото c id: {result[0]}')
+    
     return result[0]
 
 
 def get_image (Session, id: int):
-    try:
-        s = select(image_table).where(image_table.c.id == id)
-        with engine.begin() as conn: 
-            for row in conn.execute(s):
-                print(f'Выбрано фото c id: {row[0]}')
-                return row
+    s = select(image_table).where(image_table.c.id == id)
+    with engine.begin() as conn: 
+        for row in conn.execute(s):
+            print(f'Выбрано фото c id: {row[0]}')
+            return row
                 
-    finally:
-        Session.close()
+   
     #2 with engine.begin() as conn:
         
         #result = conn.execute(s)
@@ -46,12 +38,20 @@ def get_image (Session, id: int):
     
 
 def del_image(Session, id: int):
-    db_image = Session.query(image_table).filter(image_table.id == id).first()
-    if db_image is None:
-        raise HTTPException(status_code=404, detail="Image not found")
-    Session.delete(db_image)
-    Session.commit()
-    return db_image.id
+    with engine.begin() as conn:
+        result_del = conn.execute(delete(image_table).where(image_table.c.id == id))
+        print(f'Удалено фото c id: {id}')
+        return result_del
+
+
+
+
+    #db_image = Session.query(image_table).filter(image_table.id == id).first()
+    #if db_image is None:
+        #raise HTTPException(status_code=404, detail="Image not found")
+    #Session.delete(db_image)
+    #Session.commit()
+    #return db_image.id
 
     
 

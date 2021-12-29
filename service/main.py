@@ -44,9 +44,9 @@ async def get_item(image_id: int, db: Session = Depends(get_db))-> dict:
 @app.delete('/images/{image_id}')
 async def del_item(image_id: int, db: Session = Depends(get_db))-> dict:
     db_image = del_image(db, id=image_id)
-    return {"id": db_image}
+    return {"delete image_id": image_id}
 
-@app.get('/images/count')
+@app.get('/images/count/{info}')
 async def count_item(image_id: int, faces: int, time: str, db: Session = Depends(get_db))-> dict:
     db_image_count = count_image(db, id = image_id, faces = faces, time = time)
     return {"count": db_image_count}
