@@ -25,4 +25,3 @@ bot_table = Table ('bot_users', meta,
 
 
 meta.create_all(engine)
-SessionLocal = sessionmaker()
