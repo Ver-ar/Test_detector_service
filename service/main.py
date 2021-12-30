@@ -6,16 +6,13 @@ from models import *
 
 app = FastAPI()
 
-
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
-    
-    #now create_image does 2 actions: 
     faces = detect(image)
     #detect of detect_faces.py
     item = create_image(faces=faces)    
-    # puts value faces with int in (db: Session, faces: int) in file write_value.py: db_image = models.Image(faces=faces)
-    # value faces assign to value model in class Image (models.Image(faces=faces))
+    # puts value faces with int in file write_value.py: db_image = models.Image(faces=faces)
+    # value faces assign to value model
     # models.py takes value faces from write_value(class Image) and put faces to value faces of Column in models.py
     return {"image_id" : item, "faces": faces}
     # image_id return value from db, generated from autoincrement
