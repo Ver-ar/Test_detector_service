@@ -3,3 +3,8 @@ env/
 __pycache__/
 *.pyc
 *.xml
+req.py
+my_database.db
+*.jpg
+settings.py
+*.log
