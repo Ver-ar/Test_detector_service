@@ -16,26 +16,27 @@ app = FastAPI()
 
 
 @app.post('/images/')
-async def create_item(image: bytes = File(...)) -> dict:
-    
-    #now create_image does 2 actions: 
+async def create_item(image: bytes = File(...)) -> dict:    
     faces = detect(image)
     #detect of detect_faces.py
     item = create_image(faces=faces)    
-    # puts value faces with int in (db: Session, faces: int) in file write_value.py: db_image = models.Image(faces=faces)
-    # value faces assign to value model in class Image (models.Image(faces=faces))
-    # models.py takes value faces from write_value(class Image) and put faces to value faces of Column in models.py
+    # puts value faces with int in (faces: int)
+    # models.py takes value faces from write_value and put faces to value faces of Column in models.py
     return {"image_id" : item, "faces": faces}
     # image_id return value from db, generated from autoincrement
 
 @app.get('/images/count/image_id/{image_id}')
 async def count_item_id(image_id: int = Path(..., title="The ID of the image to get", gt=0))-> dict:
     db_image = count_image_id(id = image_id)
+    if db_image is None:
+        raise HTTPException(status_code=404, detail="Image not found")
     return db_image
 
 @app.get('/images/count/faces/{faces}')
 async def count_item_faces(faces: int = Path(..., title="The faces on the image to get", gt=0))-> dict:
     db_image = count_image_faces(faces = faces)
+    if db_image is None:
+        raise HTTPException(status_code=404, detail="Image not found")
     return db_image
 
 
@@ -43,7 +44,7 @@ async def count_item_faces(faces: int = Path(..., title="The faces on the image 
 async def get_item(image_id: int = Path(..., gt=0))-> dict:
     db_image = get_image(id=image_id)
     if db_image is None:
-        raise HTTPException(status_code=404, detail="Image not found")
+        raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     return db_image
 
 @app.delete('/images/{image_id}')
