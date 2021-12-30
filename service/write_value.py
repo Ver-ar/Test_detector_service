@@ -1,65 +1,41 @@
-from sqlalchemy import delete, insert, func
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import func, select
 from models import *
-from fastapi import HTTPException
-from detect_faces import detect
-#from create_database import engine
-from sqlalchemy.sql import select
 
 
 
-def create_image(Session, faces: int):    
+def create_image(faces: int):    
     with engine.begin() as conn:            
-            #ins = image_table.insert().values(faces='faces')
-            #ins = conn.execute(image_table.select())
         result = conn.execute(image_table.insert(),{"faces": faces}).inserted_primary_key 
-                               
         print(f'В базу добавлено фото c id: {result[0]}')
-    
     return result[0]
 
-
-def get_image (Session, id: int):
-    s = select(image_table).where(image_table.c.id == id)
+def get_image (id: int):
+    select_image = select(image_table).where(image_table.c.id == id)
     with engine.begin() as conn: 
-        for row in conn.execute(s):
+        for row in conn.execute(select_image):
             print(f'Выбрано фото c id: {row[0]}')
             return row
-                
-   
-    #2 with engine.begin() as conn:
-        
-        #result = conn.execute(s)
-        #row = result.fetchone()
-        #return ("id:", row._mapping['id'], "; faces:", row._mapping['faces'], "; datetime:", row._mapping['datetime'])
-    #1  return Session.query(image_table).filter(image_table.id == id).first()
-        
-    
 
-def del_image(Session, id: int):
+def del_image(id: int):
+    
+    result_del = image_table.delete().where(image_table.c.id == id)
     with engine.begin() as conn:
-        result_del = conn.execute(delete(image_table).where(image_table.c.id == id))
+        conn.execute(result_del)
         print(f'Удалено фото c id: {id}')
-        return result_del
+        return id
+   
+def count_image_id(id: int):
+    count_table = [func.count('*').label('count'), image_table.c.id]
+    select_count = select(count_table).where(image_table.c.id == id)
+    with engine.begin() as conn:
+        result = conn.execute(select_count)
+        result_count = result.fetchall()                
+    return result_count[0][0] 
 
-
-
-
-    #db_image = Session.query(image_table).filter(image_table.id == id).first()
-    #if db_image is None:
-        #raise HTTPException(status_code=404, detail="Image not found")
-    #Session.delete(db_image)
-    #Session.commit()
-    #return db_image.id
-
-    
-
-def count_image(Session, id: int, faces: int, time: str):
-    #images = db.query(Image).filter(Image.id == id, Image.faces == faces, Image.datetime == time).count()
-    #return images
-    try:
-        count_fn = func.count(image_table.c.id == id, image_table.c.faces == faces, image_table.c.datetime == time)
-        return count_fn
-    finally:
-        Session.close()
+def count_image_faces(faces: int):
+    count_table = [func.count('*').label('count'), image_table.c.faces]
+    select_count = select(count_table).where(image_table.c.faces == faces)
+    with engine.begin() as conn:
+        result = conn.execute(select_count)
+        result_count = result.fetchall()                
+    return result_count[0][0]

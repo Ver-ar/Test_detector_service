@@ -6,3 +6,5 @@ __pycache__/
 req.py
 my_database.db
 *.jpg
+settings.py
+*.log
