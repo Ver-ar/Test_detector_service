@@ -21,12 +21,11 @@ def greet_user(update, context):
     user_id = update.message.chat.id
     with engine.begin() as conn: 
         result = conn.execute(bot_table.insert(),{'user_id': user_id})
+        print(update)
         return result
     #user = update.message.from_user
     #user_data = context.user_data
     
-
-    print(update)
 
 def talk_to_me(update, context):
     text = update.message.text 
@@ -68,7 +67,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     
     logging.info("The bot was launched") 
-    mybot.polling(none_stop = True)
+    mybot.start_polling()
     mybot.idle()
 
 if __name__ == "__main__":
