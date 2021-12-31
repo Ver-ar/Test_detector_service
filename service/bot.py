@@ -1,11 +1,7 @@
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
-
-import telegram
+from sqlalchemy import select
 import settings 
-import sys
-import os
-from sqlalchemy import create_engine, MetaData
 from models import *
 
 conn = engine.connect()
@@ -14,7 +10,7 @@ logging.basicConfig(filename='bot.log', format='%(asctime)s-%(message)s', level=
 
 logger = logging.getLogger(__name__)
 
-#определяем функцию greet_user
+
 def greet_user(update, context):
     print("Вызван /start")
     update.message.reply_text('Привет! С моей помощью ты можешь отслеживать количество лиц на фото в базе данных с помощью команды /face_track')
@@ -23,48 +19,67 @@ def greet_user(update, context):
         result = conn.execute(bot_table.insert(),{'user_id': user_id})
         print(update)
         return result
-    #user = update.message.from_user
-    #user_data = context.user_data
-    
 
-def talk_to_me(update, context):
-    text = update.message.text 
-    print(text)
-    update.message.reply_text(text)
+def database_start(update, context):
+    print("Вызван database_start")
+    update.message.reply_text(f'Введите количество лиц, которое Вы хотите отслеживать:')
+    return "number"
 
-def face_track(update, context):
-  update.message.reply_text('Введите количество лиц, которое Вы хотите отслеживать:')
-  print("Вызван /word_count")
+def database_value(update, context):
+    msg_value = update.message.text
+    if type(msg_value) != int:
+        update.message.reply_text(f'Пожалуйста, введите целое число')
+        return "number"  
+    else:
+        context.user_data["numbers"] = {"number": msg_value}      
+        def count_image_faces(msg_value):
+            photo_list = select([image_table]).where(image_table.c.faces == msg_value)
+            with engine.begin() as conn:
+                result = conn.execute(photo_list.fetchall())
+                photo_count = sum([len(element) for element in photo_list])
+                print_list = str(result).replace("[", "").replace("]", "").replace("'", "").replace("(')", "").replace(")", "")                           
+            update.message.reply_text (f'Есть {photo_count} фото с указанным количеством лиц в списке. Список фото: {print_list}')
+        count_image_faces(msg_value)
 
-def sentence_check(update, context):
-    text = update.message.text
-    if text.strip():
-        text_split=text.split()
-        count=len(text_split)
-        if count == 0:
-            update.message.reply_text(f"Пустая строка, введите значение:")
-    print(update)
+def request_incorrect(update, context):
+    update.message.reply_text(f'Некорректный ввод, введите число')
 
+'''
 def cancel(update, context):
     user = update.message.from_user
-    logger.info("User %s canceled the conversation.", user.first_name)
-    update.message.reply_text('Bye! Hope to see you again next time.')
+    logger.info("Пользователь %s завершил общение.", user.first_name)
+    update.message.reply_text('Пока!')
     return ConversationHandler.END
 
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
+'''
 
-#1. Запускаем бота
 def main():
     mybot = Updater(settings.API_KEY, use_context=True)
 
     dp = mybot.dispatcher
+
+    
+    database_request = ConversationHandler(
+        entry_points=[
+            (CommandHandler("face_track", database_start), database_start)],
+        states={
+            "number": [MessageHandler(Filters.text, database_value)]
+            },
+        fallbacks=[
+            MessageHandler(Filters.text | Filters.photo | Filters.audio | Filters.sticker | Filters.video | Filters.voice | Filters.location 
+            | Filters.document | Filters.animation , request_incorrect)
+        ]
+    )
+
+    dp.add_handler(database_request)
+
     dp.add_handler(CommandHandler("start", greet_user))
-    dp.add_handler(CommandHandler("wordcount", face_track))
-    dp.add_handler(MessageHandler(Filters.text, sentence_check))
-    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
+    dp.add_handler(MessageHandler(Filters.text, greet_user))
+   
     
     logging.info("The bot was launched") 
     mybot.start_polling()
