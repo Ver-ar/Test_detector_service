@@ -1,8 +1,8 @@
 from fastapi import FastAPI, File, HTTPException, Path
 import uvicorn
-from .detect_faces import detect
-from .write_value import count_image_faces, create_image, get_image, del_image
-from .models import *
+from detect_faces import detect
+from write_value import count_image_faces, create_image, get_image, del_image
+from models import *
 import gunicorn
 
 app = FastAPI()
