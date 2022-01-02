@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 
-engine = create_engine('sqlite:///./my_database.db', pool_pre_ping=True)
+engine = create_engine('postgresql:///./my_database.db', pool_pre_ping=True)
 
 meta = MetaData()
 
