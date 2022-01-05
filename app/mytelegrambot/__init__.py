@@ -1,0 +1,1 @@
+from mytelegrambot import bot

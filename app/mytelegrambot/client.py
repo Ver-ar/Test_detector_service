@@ -2,17 +2,18 @@ from aiogram import types, Dispatcher
 from sqlalchemy import select
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import FSMContext
-from ...write_value import del_image, get_image, get_image_faces
-from ..bot import Track, Get, Del, GetID
-from ...models import *
-from ...detect_faces import *
-from ..create_bot import dp
+from .. import write_value
+from mytelegrambot.bot import Track, Get, Del, GetID
+from .. import models
+
+from ..detect_faces import *
+from create_bot import dp
 import string
-import sys
-sys.path.append("/app")
+import os.path as path
 
 
-conn = engine.connect()
+
+conn = models.engine.connect()
 
 #@dp.message_handler(commands=['help'])
 async def help_menu(message: types.Message):
@@ -34,8 +35,8 @@ async def help_menu(message: types.Message):
 async def send_welcome(message: types.Message):
     await message.reply('Привет! С моей помощью ты можешь отслеживать состояние базы данных с определением количества лиц на фото. Вывести меню команд - /help')
     user_id = message.chat.id
-    with engine.begin() as conn: 
-        conn.execute(bot_table.insert(),{'user_id': user_id})
+    with models.engine.begin() as conn: 
+        conn.execute(models.bot_table.insert(),{'user_id': user_id})
     print(user_id)
     await help_menu(message=message)
 
@@ -61,8 +62,8 @@ async def value_send(message: types.Message, state: FSMContext):
         i = i.lower().translate(str.maketrans('', '', string.punctuation))
         if i.isnumeric():
             i = int(i)            
-            with engine.begin() as conn: 
-                conn.execute(bot_table.insert(),{'face_from_user': i,'user_id': user_id})
+            with models.engine.begin() as conn: 
+                conn.execute(models.bot_table.insert(),{'face_from_user': i,'user_id': user_id})
             print('faces')
             await state.finish()
 
@@ -80,9 +81,9 @@ async def value_send(message: types.Message, state: FSMContext):
         i = i.lower().translate(str.maketrans('', '', string.punctuation))
         if i.isnumeric():
             i = int(i)            
-        print(get_image_faces(i))
+        print(write_value.get_image_faces(i))
         print('get')
-        await message.reply(get_image_faces(i))
+        await message.reply(write_value.get_image_faces(i))
 
         await state.finish()
 
@@ -99,9 +100,9 @@ async def value_send(message: types.Message, state: FSMContext):
         i = i.lower().translate(str.maketrans('', '', string.punctuation))
         if i.isnumeric():
             i = int(i)            
-        print(get_image(i))
+        print(write_value.get_image(i))
         print('getid')
-        await message.reply(get_image(i))
+        await message.reply(write_value.get_image(i))
 
         await state.finish()
 
@@ -118,8 +119,8 @@ async def value_send(message: types.Message, state: FSMContext):
         i = i.lower().translate(str.maketrans('', '', string.punctuation))
         if i.isnumeric():
             i = int(i)            
-        print(del_image(i))
-        await message.reply(del_image(i))
+        print(write_value.del_image(i))
+        await message.reply(write_value.del_image(i))
 
         await state.finish()
 
