@@ -1,9 +1,10 @@
 from fastapi import FastAPI, File, HTTPException, Path
-import uvicorn
+from sqlalchemy.sql import schema
+
 from detect_faces import detect
-from write_value import count_image_faces, create_image, get_image, del_image
+from write_value import count_image_faces, create_image, get_image, del_image, get_images
 from models import *
-import gunicorn
+
 
 app = FastAPI()
 
@@ -33,6 +34,22 @@ async def get_item(image_id: int = Path(..., gt=0))-> dict:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
         return db_image
+
+@app.get('/images/all/')
+async def get_items():
+    db_image = get_images()
+    if len(db_image) == 0:
+        raise HTTPException(status_code=404, detail="Table empty")
+    else:
+        return db_image
+
+
+
+
+
+
+
+
 
 @app.delete('/images/{image_id}')
 async def del_item(image_id: int = Path(..., gt=0))-> dict:

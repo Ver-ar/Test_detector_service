@@ -33,3 +33,37 @@ def count_image_faces(faces: int):
         result = conn.execute(select_count)
         result_count = result.fetchone()                             
     return result_count[1]
+
+
+def get_image_faces (faces: int):
+    select_image = select(image_table).where(image_table.c.faces == faces)
+    with engine.begin() as conn: 
+        result = conn.execute(select_image)
+        result_image = result.fetchall() 
+        print(f'Выбрано фото c количеством лиц: {result_image}')
+        return result_image
+
+
+
+def get_images():
+    select_image = select([image_table])
+    with engine.begin() as conn: 
+        result = conn.execute(select_image)
+        print(f'resultascwwef_fetchall(){result.fetchall()}')      
+        resultt=result.fetchall()                
+        return resultt
+
+
+
+
+'''
+def compare_values(face_from_user:int):
+    
+    compare = select (image_table).where(image_table.c.faces==bot_table.c.face_from_user)
+    with engine.begin() as conn:
+        result = conn.execute(compare)
+        result_compare = result.fetchall()
+        print(result)
+        print(result_compare)
+        return(result_compare)
+'''
