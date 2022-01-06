@@ -20,10 +20,8 @@ def get_image (id: int):
 def del_image(id: int):    
     result_del = image_table.delete().where(image_table.c.id == id)
     with engine.begin() as conn:
-        conn.execute(result_del)
+        id = conn.execute(result_del).rowcount
         print(f'Удалено фото c id: {id}')
-        print(conn.execute(result_del))
-        print(conn.execute(result_del).rowcount)
         return id
    
 def count_image_faces(faces: int):
@@ -35,7 +33,7 @@ def count_image_faces(faces: int):
     return result_count[1]
 
 
-def get_image_faces (faces: int):
+def get_image_from_faces (faces: int):
     select_image = select(image_table).where(image_table.c.faces == faces)
     with engine.begin() as conn: 
         result = conn.execute(select_image)
@@ -45,13 +43,11 @@ def get_image_faces (faces: int):
 
 
 
-def get_images():
+def get_db():
     select_image = select([image_table])
     with engine.begin() as conn: 
-        result = conn.execute(select_image)
-        print(f'resultascwwef_fetchall(){result.fetchall()}')      
-        resultt=result.fetchall()                
-        return resultt
+        result = conn.execute(select_image).fetchall()             
+        return result
 
 
 
