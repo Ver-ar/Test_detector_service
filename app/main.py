@@ -50,6 +50,6 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
     if not db_image:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
-        return {"delete image_id": db_image}
+        return {"delete image_id": image_id}
 
 

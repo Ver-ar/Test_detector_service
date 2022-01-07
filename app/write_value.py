@@ -20,9 +20,12 @@ def get_image (id: int):
 def del_image(id: int):    
     result_del = image_table.delete().where(image_table.c.id == id)
     with engine.begin() as conn:
-        id = conn.execute(result_del).rowcount
-        print(f'Удалено фото c id: {id}')
-        return id
+        result = conn.execute(result_del)
+        if result.rowcount == 1:
+            print(f'Удалено фото c id: {id}')
+            return result
+        else:
+            return
    
 def count_image_faces(faces: int):
     count_table = [func.count('*').label('count'), image_table.c.faces]
