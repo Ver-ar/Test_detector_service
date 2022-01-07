@@ -5,13 +5,12 @@ from aiogram.utils import executor
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import FSMContext
 from write_value import get_image_from_faces, get_image, del_image, get_db
-from models import *
-from detect_faces import *
+from models import bot_table, engine
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-bot = Bot(token="5096933168:AAF9fwWdO5S3NNQUxEgF6IyKaub9eY6WQ3k",)
+bot = Bot(token="token",)
 storage = MemoryStorage()
 
 dp = Dispatcher(bot=bot, storage=storage)

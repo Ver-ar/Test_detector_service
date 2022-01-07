@@ -1,6 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from mytelegrambot.bot import Track, Get, Del, GetID
+from bot import Track, Get, Del, GetID
 from .. import models
 from create_bot import dp
 from aiogram.types.message import ContentType
