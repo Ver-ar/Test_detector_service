@@ -1,14 +1,10 @@
 from aiogram.utils import executor
-import client, admin, other
+from . import client
 from create_bot import dp
 
 
 async def on_startup(_):
     print("Вызван бот")
-
-
-
-
 
 client.register_handlers_client(dp)
 

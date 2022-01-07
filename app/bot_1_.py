@@ -1,23 +1,17 @@
 import logging
-import aiogram.utils.markdown as md
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types.message import ContentType
 from aiogram.utils import executor
-from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import FSMContext
 from write_value import get_image_from_faces, get_image, del_image, get_db
-from mytelegrambot.bot import Track, Get, Del, GetID
 from models import *
 from detect_faces import *
-import string
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.utils.markdown import text
-from aiogram.types import ParseMode
 
-bot = Bot(token="5096933168:AAGk0iiOi4U3ZeUib74Kq1KkOpZlZCpUQN0",)
+bot = Bot(token="5096933168:AAF9fwWdO5S3NNQUxEgF6IyKaub9eY6WQ3k",)
 storage = MemoryStorage()
 
 dp = Dispatcher(bot=bot, storage=storage)
@@ -148,7 +142,7 @@ async def value_send(message: types.Message, state: FSMContext):
             photo_list_view.append(new_value)
             photo_list.pop(0)
             count-=1
-            await message.reply(f"Найдено {len(photo_list_view)} фото с указанным количеством лиц: {photo_list_view}")
+        await message.reply(f"Найдено {len(photo_list_view)} фото с указанным количеством лиц: {photo_list_view}")
     else:
         await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено")
     await state.finish()
