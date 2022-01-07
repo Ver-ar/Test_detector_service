@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types.message import ContentType
@@ -12,12 +13,27 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 bot = Bot(token="token",)
 storage = MemoryStorage()
-
 dp = Dispatcher(bot=bot, storage=storage)
 
 
 async def on_startup(_):
     print("Вызван бот")
+
+
+'''
+async def main():
+    bot = Bot(token="5096933168:AAF9fwWdO5S3NNQUxEgF6IyKaub9eY6WQ3k",)
+    try:
+        async def on_startup(_):
+            print("Вызван бот")
+        
+        storage = MemoryStorage()
+        dp = Dispatcher(bot=bot, storage=storage)
+        executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    finally:
+        await bot.close()
+'''
+
 
 conn = engine.connect()
 
@@ -130,18 +146,13 @@ async def value_send_invalid(message: types.Message):
 
 @dp.message_handler(lambda message: message.text.isdigit(), state=Get.get_faces)
 async def value_send(message: types.Message, state: FSMContext):
-    id_image=int(message.text)
-    photo_list = get_image_from_faces(id_image)
+    faces=int(message.text)
+    photo_list = get_image_from_faces(faces)
         
     if len(photo_list) !=0: 
-        photo_list_view=[]
-        count=len(photo_list)
-        while count!=0:
-            new_value = 'id фото: {photo_list[0][0]}, количество лиц: {photo_list[0][1]}'.format(photo_list=photo_list)
-            photo_list_view.append(new_value)
-            photo_list.pop(0)
-            count-=1
-        await message.reply(f"Найдено {len(photo_list_view)} фото с указанным количеством лиц: {photo_list_view}")
+        for a in photo_list:
+            await message.reply (f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}')
+        await message.reply(f"Найдено {len(photo_list)} фото с указанным количеством лиц: {a}")
     else:
         await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено")
     await state.finish()
@@ -184,7 +195,7 @@ async def value_send(message: types.Message, state: FSMContext):
     a = del_image(id_image)    
     if a is not None: 
         await message.reply(f"Удалено фото с id: {id_image}") 
-    else: #проверка не работает
+    else: 
         await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено") 
     await state.finish()
 
@@ -205,9 +216,8 @@ def register_handlers_client(dp: Dispatcher):
 
 register_handlers_client(dp)
 '''
+#asyncio.run(main())
 executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
-
-
 '''
 if not db_image:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")

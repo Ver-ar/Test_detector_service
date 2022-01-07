@@ -4,9 +4,23 @@ from sqlalchemy.sql import schema
 from detect_faces import detect
 from write_value import count_image_faces, create_image, get_image, del_image, get_db
 from models import *
-
+import os
+import subprocess
+import sys
+import shlex
+import asyncio
 
 app = FastAPI()
+'''
+@app.on_event("startup")
+async def startup_event():
+    cmd = 'python bot_1_.py'
+    args = shlex.split(cmd)
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = p.communicate()[0]
+    print(result)
+    return p
+'''
 
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
