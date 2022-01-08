@@ -5,13 +5,14 @@ from aiogram.types.message import ContentType
 from aiogram.utils import executor
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import FSMContext
-from write_value import get_image_from_faces, get_image, del_image, get_db
-from models import bot_table, engine
+from crud import get_image_from_faces, get_image, del_image, get_db
+from models import bot_table, image_table, engine
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from sqlalchemy import func, select
 
-bot = Bot(token="token",)
+bot = Bot(token="5096933168:AAF9fwWdO5S3NNQUxEgF6IyKaub9eY6WQ3k")
 storage = MemoryStorage()
 dp = Dispatcher(bot=bot, storage=storage)
 
@@ -57,6 +58,8 @@ class Del(StatesGroup):
 class GetID(StatesGroup):
     get_id = State()
 
+class Faces():
+    faces_user = State()
 
 
 
@@ -99,21 +102,14 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['view'])
 async def view_all(message: types.Message):
     photo_list = get_db()
-    photo_list_view=[]
-    count=len(photo_list)
-    while count!=0:
-        new_value = 'id фото: {photo_list[0][0]}, количество лиц: {photo_list[0][1]}'.format(photo_list=photo_list)
-        photo_list_view.append(new_value)
-        photo_list.pop(0)
-        count-=1
-        
-    await message.reply('\n'.join(photo_list_view))
+    await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
 ################################################
 
 @dp.message_handler(commands=['faces'])
 async def write_value_from_user(message: types.Message):
-    await Track.faces.set()
+    
     await message.reply("Введи количество лиц, которое ты хочешь отслеживать:")
+    await Track.faces.set()
 
 @dp.message_handler(lambda message: not message.text.isdigit(), state=Track.faces)
 async def value_send_invalid(message: types.Message):
@@ -126,9 +122,20 @@ async def value_send(message: types.Message, state: FSMContext):
     faces=int(message.text)
     with engine.begin() as conn: 
         conn.execute(bot_table.insert(),{'face_from_user': faces,'user_id': user_id})
-        print(f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
-    await message.reply(f"Данные для отслеживания сохранены")
+    ans = get_image_from_faces(faces)
+    #await Track.next()
+    await message.answer(user_id, ans)
     await state.finish()
+'''
+async def notify_to_user(faces: int):
+        select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
+        with engine.begin() as conn:
+            result = conn.execute(select_image)
+'''
+
+
+
+
 
 
 
@@ -150,9 +157,7 @@ async def value_send(message: types.Message, state: FSMContext):
     photo_list = get_image_from_faces(faces)
         
     if len(photo_list) !=0: 
-        for a in photo_list:
-            await message.reply (f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}')
-        await message.reply(f"Найдено {len(photo_list)} фото с указанным количеством лиц: {a}")
+        await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
     else:
         await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено")
     await state.finish()
@@ -200,6 +205,14 @@ async def value_send(message: types.Message, state: FSMContext):
     await state.finish()
 
 ###############################################
+
+#@dp.message_handler()
+
+
+
+
+
+###############################################
 @dp.message_handler(content_types = ContentType.ANY)
 async def unknown_message(message: types.Message):
     await message.answer("Ничего не понятно, но очень интересно:) Введи /help, чтоб посмотреть интересующую тебя команду")
@@ -207,7 +220,7 @@ async def unknown_message(message: types.Message):
 '''
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(send_welcome, commands=['start'])
-    dp.register_message_handler(write_value_from_user, commands=['faces'])  
+    dp.register_message_handler(notify_to_user, commands=['faces'])  
     dp.register_message_handler(send_images, commands=['getid'])    
     dp.register_message_handler(del_images, commands=['del'])
     dp.register_message_handler(help_menu, commands=['help'])

@@ -1,18 +1,28 @@
 from aiogram import types
-from aiogram.dispatcher import FSMContext
-from bot import Track, Get, Del, GetID
-from .. import models
-from create_bot import dp
-from aiogram.types.message import ContentType
-from write_value import get_image_from_faces, get_image, del_image, get_db
+from aiogram.dispatcher import Dispatcher, FSMContext
 from models import *
+from aiogram.types.message import ContentType
+from crud import get_image_from_faces, get_image, del_image, get_db
 from detect_faces import *
-from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from tg_bot import dp
 
+conn = engine.connect()
 
+class Track(StatesGroup):
+    faces = State()
 
-conn = models.engine.connect()
+class Get(StatesGroup):
+    get_faces = State()
 
+class View(StatesGroup):
+    view_faces = State()
+
+class Del(StatesGroup):
+    del_id = State()
+
+class GetID(StatesGroup):
+    get_id = State()
 
 #dp.message_handler(commands=['help'])
 async def help_menu(message: types.Message):
@@ -36,7 +46,7 @@ async def send_welcome(message: types.Message):
     user_id = message.chat.id
     with engine.begin() as conn: 
         conn.execute(bot_table.insert(),{'user_id': user_id})
-    print(user_id)
+    
     await help_menu(message=message)
 
 #@dp.message_handler(state='*', commands='cancel')
@@ -53,15 +63,8 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 #@dp.message_handler(commands=['view'])
 async def view_all(message: types.Message):
     photo_list = get_db()
-    photo_list_view=[]
-    count=len(photo_list)
-    while count!=0:
-        new_value = 'id фото: {photo_list[0][0]}, количество лиц: {photo_list[0][1]}'.format(photo_list=photo_list)
-        photo_list_view.append(new_value)
-        photo_list.pop(0)
-        count-=1
-        
-    await message.reply('\n'.join(photo_list_view))
+    await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
+
 ################################################
 
 #@dp.message_handler(commands=['faces'])
@@ -104,14 +107,7 @@ async def value_send(message: types.Message, state: FSMContext):
     photo_list = get_image_from_faces(id_image)
         
     if len(photo_list) !=0: 
-        photo_list_view=[]
-        count=len(photo_list)
-        while count!=0:
-            new_value = 'id фото: {photo_list[0][0]}, количество лиц: {photo_list[0][1]}'.format(photo_list=photo_list)
-            photo_list_view.append(new_value)
-            photo_list.pop(0)
-            count-=1
-            await message.reply(f"Найдено {len(photo_list_view)} фото с указанным количеством лиц: {photo_list_view}")
+        await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
     else:
         await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено")
     await state.finish()

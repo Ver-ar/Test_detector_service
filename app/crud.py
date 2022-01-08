@@ -44,17 +44,28 @@ def get_image_from_faces (faces: int):
         print(f'Выбрано фото c количеством лиц: {result_image}')
         return result_image
 
-
-
 def get_db():
     select_image = select([image_table])
     with engine.begin() as conn: 
         result = conn.execute(select_image).fetchall()             
         return result
 
-
-
-
+def get_notify_users(faces: int):                #получаем id по кол-ву лиц, чтоб передать его в рез-т отправки сообщений ботом из таблицы фото по этому id
+    select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
+    with engine.begin() as conn:
+        result = conn.execute(select_image)
+        result_id = result.fetchall()
+        print(f'id по этому кол-ву лиц: {result_id}')
+        return result_id
+'''
+def compare_faces(faces: int):
+    select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
+    with engine.begin() as conn:
+        result = conn.execute(select_image)
+        result_image = result.fetchall()
+        print(f'Выбрано фото c количеством лиц: {result_image}')
+        return result_image
+'''
 '''
 def compare_values(face_from_user:int):
     
