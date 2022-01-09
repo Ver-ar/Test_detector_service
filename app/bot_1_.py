@@ -58,8 +58,8 @@ class Del(StatesGroup):
 class GetID(StatesGroup):
     get_id = State()
 
-class Faces():
-    faces_user = State()
+#class Faces():
+    #faces_user = State()
 
 
 
@@ -124,7 +124,7 @@ async def value_send(message: types.Message, state: FSMContext):
         conn.execute(bot_table.insert(),{'face_from_user': faces,'user_id': user_id})
     ans = get_image_from_faces(faces)
     #await Track.next()
-    await message.answer(user_id, ans)
+    await message.reply(f'{ans}')
     await state.finish()
 '''
 async def notify_to_user(faces: int):
