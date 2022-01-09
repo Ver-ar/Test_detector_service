@@ -5,7 +5,7 @@ from aiogram.types.message import ContentType
 from crud import get_image_from_faces, get_image, del_image, get_db
 from detect_faces import *
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from mytelegrambot.tg_bot import dp
+
 
 conn = engine.connect()
 
@@ -172,4 +172,3 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(cancel_handler, commands=['cancel'])
     dp.register_message_handler(unknown_message, content_types = ContentType.ANY)
 
-register_handlers_client(dp)

@@ -9,10 +9,9 @@ import asyncio
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from mytelegrambot.settings import API_KEY
-
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from mytelegrambot import handlers_
 import logging
-from mytelegrambot import tg_bot
 
 app = FastAPI()
 
@@ -21,36 +20,32 @@ app = FastAPI()
 async def launch_bot():
     bot = Bot(token=API_KEY,)
     try:
-        dp = tg_bot.dp       
+        storage = MemoryStorage()
+
+        dp = Dispatcher(bot=bot, storage=storage)       
         logging.basicConfig(filename='bot.log', format='%(asctime)s-%(message)s', level=logging.DEBUG)
         logger = logging.getLogger(__name__)
-        await dp.start_polling(dp, skip_updates=True)
+        dp = Dispatcher(bot=bot, storage=storage)       
+        handlers_.register_handlers_client(dp)
+        app.bot = bot
+        await dp.start_polling(dp)
+
     finally:
         await bot.close()
-
-asyncio.run(launch_bot())
 
 
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
     faces = detect(image)
     #detect of detect_faces.py
-    item = create_image(faces=faces)    
+    item = create_image(faces=faces)   
+    get_notify_users(faces) 
     # puts value faces with int in file write_value.py: db_image = models.Image(faces=faces)
     # value faces assign to value model
     # models.py takes value faces from write_value(class Image) and put faces to value faces of Column in models.py
     return {"image_id" : item, "faces": faces}
     # image_id return value from db, generated from autoincrement
 
-@app.post('/images/bot')
-async def search_id(image: bytes = File(...)) -> dict:
-    faces = detect(image)
-    
-    item = create_image(faces=faces)    
-    
-    id = get_notify_users(faces=faces)
-
-    return {"image_id" : item, "faces": faces, "user_id": id}
     
 
 @app.get('/images/count/faces/{faces}')
