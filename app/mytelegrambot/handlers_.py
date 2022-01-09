@@ -5,7 +5,7 @@ from aiogram.types.message import ContentType
 from crud import get_image_from_faces, get_image, del_image, get_db
 from detect_faces import *
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from tg_bot import dp
+from mytelegrambot.tg_bot import dp
 
 conn = engine.connect()
 
@@ -66,6 +66,7 @@ async def view_all(message: types.Message):
     await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
 
 ################################################
+
 
 #@dp.message_handler(commands=['faces'])
 async def write_value_from_user(message: types.Message):

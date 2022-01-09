@@ -1,6 +1,7 @@
 from aiogram.dispatcher import Dispatcher
-import handlers_
+from mytelegrambot import handlers_
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from main import bot
 
 storage = MemoryStorage()
 
