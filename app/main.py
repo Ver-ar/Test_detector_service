@@ -5,7 +5,7 @@ from detect_faces import detect
 from crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
 from models import *
 import asyncio
-
+'''
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from mytelegrambot.settings import API_KEY
@@ -13,10 +13,10 @@ from mytelegrambot.settings import API_KEY
 from mytelegrambot import handlers_
 import logging
 from mytelegrambot import tg_bot
-
+'''
 app = FastAPI()
 
-
+'''
 @app.on_event("startup")
 async def launch_bot():
     bot = Bot(token=API_KEY,)
@@ -29,7 +29,7 @@ async def launch_bot():
         await bot.close()
 
 asyncio.run(launch_bot())
-
+'''
 
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
