@@ -66,14 +66,3 @@ def compare_faces(faces: int):
         print(f'Выбрано фото c количеством лиц: {result_image}')
         return result_image
 '''
-'''
-def compare_values(face_from_user:int):
-    
-    compare = select (image_table).where(image_table.c.faces==bot_table.c.face_from_user)
-    with engine.begin() as conn:
-        result = conn.execute(compare)
-        result_compare = result.fetchall()
-        print(result)
-        print(result_compare)
-        return(result_compare)
-'''

@@ -165,10 +165,10 @@ async def unknown_message(message: types.Message):
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(send_welcome, commands=['start'])
     dp.register_message_handler(write_value_from_user, commands=['faces'])  
+    dp.register_message_handler(send_images, commands=['getface'])
     dp.register_message_handler(send_images, commands=['getid'])    
     dp.register_message_handler(del_images, commands=['del'])
     dp.register_message_handler(help_menu, commands=['help'])
     dp.register_message_handler(view_all, commands=['view'])
     dp.register_message_handler(cancel_handler, commands=['cancel'])
     dp.register_message_handler(unknown_message, content_types = ContentType.ANY)
-
