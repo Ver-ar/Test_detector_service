@@ -5,7 +5,7 @@ from crud import count_image_faces, create_image, get_image, del_image, get_db, 
 from models import *
 import asyncio
 
-from aiogram import Bot, bot
+from aiogram import Bot, bot, executor
 from aiogram.dispatcher import Dispatcher
 from mytelegrambot.settings import API_KEY
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -17,7 +17,7 @@ app.bot = bot
 
 @app.on_event("startup")
 async def launch_bot():
-    bot = Bot(token=API_KEY,)
+    bot = Bot(token=API_KEY)
     #try:
     storage = MemoryStorage()
     dp = Dispatcher(bot=bot, storage=storage)       
@@ -26,7 +26,7 @@ async def launch_bot():
     dp = Dispatcher(bot=bot, storage=storage)       
     handlers_.register_handlers_client(dp)
     
-    await dp.start_polling()
+    executor.start_polling(dp)
 
 
 
