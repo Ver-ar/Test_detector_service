@@ -26,7 +26,7 @@ async def launch_bot():
     #logger = logging.getLogger(__name__)
     handlers_.register_handlers_client(dp)
     asyncio.create_task(dp.start_polling(dp,))
-    await asyncio.sleep(1)
+   
 logger = logging.getLogger(__name__)
 
 
