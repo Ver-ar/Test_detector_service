@@ -4,27 +4,26 @@ from detect_faces import detect
 from crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
 from models import *
 
-from aiogram import Bot, bot, executor
+from aiogram import Bot, bot
 from aiogram.dispatcher import Dispatcher
 from mytelegrambot.settings import API_KEY
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from mytelegrambot import handlers_
 import logging
 import asyncio
-import concurrent.futures
 
 
 app = FastAPI()
 app.bot = bot
 
 async def main():
-    task1 = loop.create_task(launch_bot())
-    task2 = loop.create_task(create_item())
-    task3 = loop.create_task(count_item_faces())
-    task4 = loop.create_task(get_item())
-    task5 = loop.create_task(get_items())
-    task6 = loop.create_task(del_item())
-    await asyncio.wait([task1, task2,task3,task4,task5,task6])
+    task1 = asyncio.create_task(launch_bot())
+    task2 = asyncio.create_task(create_item())
+    task3 = asyncio.create_task(count_item_faces())
+    task4 = asyncio.create_task(get_item())
+    task5 = asyncio.create_task(get_items())
+    task6 = asyncio.create_task(del_item())
+    await ([task1, task2,task3,task4,task5,task6])
 
 @app.on_event("startup")
 async def launch_bot():
@@ -35,9 +34,7 @@ async def launch_bot():
     logger = logging.getLogger(__name__)
     handlers_.register_handlers_client(dp)
     dp.start_polling(dp)
-    await asyncio.sleep(0)
     #await dp.start_polling(dp)
-    #await asyncio.sleep(0)
 
 
 @app.post('/images/')
@@ -84,10 +81,4 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
 
 
 if __name__ == "__main__":
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
-    except Exception as e:
-        pass
-    finally:
-        loop.close()
+    asyncio.run(main())
