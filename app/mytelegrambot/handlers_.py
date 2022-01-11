@@ -5,9 +5,11 @@ from aiogram.types.message import ContentType
 from crud import get_image_from_faces, get_image, del_image, get_db
 from detect_faces import *
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 
 conn = engine.connect()
+memory_storage = MemoryStorage()
 
 class Track(StatesGroup):
     faces = State()
@@ -24,7 +26,7 @@ class Del(StatesGroup):
 class GetID(StatesGroup):
     get_id = State()
 
-#dp.message_handler(commands=['help'])
+#@dp.message_handler(commands=['help'])
 async def help_menu(message: types.Message):
     await message.reply(
         text='''
@@ -159,7 +161,6 @@ async def value_send(message: types.Message, state: FSMContext):
 #@dp.message_handler(content_types = ContentType.ANY)
 async def unknown_message(message: types.Message):
     await message.answer("Ничего не понятно, но очень интересно:) Введи /help, чтоб посмотреть интересующую тебя команду")
-
 
 
 def register_handlers_client(dp: Dispatcher):

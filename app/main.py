@@ -1,10 +1,9 @@
 from fastapi import FastAPI, File, HTTPException, Path
-from sqlalchemy.sql import schema
 from detect_faces import detect
 from crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
 from models import *
 
-from aiogram import Bot, bot
+from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from mytelegrambot.settings import API_KEY
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -14,38 +13,29 @@ import asyncio
 
 
 app = FastAPI()
-app.bot = bot
 
-async def main():
-    task1 = asyncio.create_task(launch_bot())
-    task2 = asyncio.create_task(create_item())
-    task3 = asyncio.create_task(count_item_faces())
-    task4 = asyncio.create_task(get_item())
-    task5 = asyncio.create_task(get_items())
-    task6 = asyncio.create_task(del_item())
-    await ([task1, task2,task3,task4,task5,task6])
+#app.bot = bot
 
+    
 @app.on_event("startup")
 async def launch_bot():
     bot = Bot(token=API_KEY)
     storage = MemoryStorage()
     dp = Dispatcher(bot=bot, storage=storage)       
     logging.basicConfig(filename='bot.log', format='%(asctime)s-%(message)s', level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
+    #logger = logging.getLogger(__name__)
     handlers_.register_handlers_client(dp)
-    dp.start_polling(dp)
-    #await dp.start_polling(dp)
+    asyncio.create_task(dp.start_polling(dp,))
+    await asyncio.sleep(1)
+logger = logging.getLogger(__name__)
 
 
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
     faces = detect(image)
-    #detect of detect_faces.py
-    item = create_image(faces=faces)   
-    get_notify_users(faces) 
+    item = create_image(faces=faces)    
     return {"image_id" : item, "faces": faces}
-    
-
+  
 @app.get('/images/count/faces/{faces}')
 async def count_item_faces(faces: int = Path(..., title="The faces on the image to get"))-> dict:
     db_image = count_image_faces(faces = faces)
@@ -78,7 +68,3 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
         return {"delete image_id": image_id}
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
