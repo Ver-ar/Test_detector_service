@@ -1,8 +1,8 @@
 from fastapi import FastAPI, File, HTTPException, Path
+import uvicorn
 from detect_faces import detect
 from crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
 from models import *
-
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from mytelegrambot.settings import API_KEY
@@ -11,11 +11,9 @@ from mytelegrambot import handlers_
 import logging
 import asyncio
 
-
 app = FastAPI()
 
 #app.bot = bot
-
     
 @app.on_event("startup")
 async def launch_bot():
@@ -68,3 +66,6 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
         return {"delete image_id": image_id}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -122,13 +122,17 @@ async def send_images(message: types.Message):
     await GetID.get_id.set()
     await message.reply('Введи интересующий id фото:')
 
+
 #@dp.message_handler(lambda message: not message.text.isdigit(), state=GetID.get_id)
 async def value_send_invalid(message: types.Message):
     return await message.reply("Введи целое число:")
+    
 
 #@dp.message_handler(lambda message: message.text.isdigit(), state=GetID.get_id)
 async def value_send(message: types.Message, state: FSMContext):
+    
     id_image=int(message.text)
+   
     a = get_image(id_image)    
     if a is not None:
         await message.reply(f"id: {a[0]}, количество лиц: {a[1]}")
@@ -140,8 +144,9 @@ async def value_send(message: types.Message, state: FSMContext):
 
 #@dp.message_handler(commands=['del'])
 async def del_images(message: types.Message):
-    await Del.del_id.set()
+    
     await message.reply('Введи нужный id:')
+    await Del.del_id.set()
 
 #@dp.message_handler(lambda message: not message.text.isdigit(), state=Del.del_id)
 async def value_send_invalid(message: types.Message):
@@ -165,11 +170,11 @@ async def unknown_message(message: types.Message):
 
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(send_welcome, commands=['start'])
-    dp.register_message_handler(write_value_from_user, commands=['faces'])  
-    dp.register_message_handler(send_images, commands=['getface'])
-    dp.register_message_handler(send_images, commands=['getid'])    
-    dp.register_message_handler(del_images, commands=['del'])
+    dp.register_message_handler(write_value_from_user, commands=['faces'],  state="*")  
+    dp.register_message_handler(send_images, commands=['getface'],  state="*")
+    dp.register_message_handler(send_images, commands=['getid'], state="*")    
+    dp.register_message_handler(del_images, commands=['del'], state="*")
     dp.register_message_handler(help_menu, commands=['help'])
     dp.register_message_handler(view_all, commands=['view'])
-    dp.register_message_handler(cancel_handler, commands=['cancel'])
+    dp.register_message_handler(cancel_handler, commands=['cancel'],  state="*")
     dp.register_message_handler(unknown_message, content_types = ContentType.ANY)
