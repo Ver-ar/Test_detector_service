@@ -1,4 +1,5 @@
 from sqlalchemy import func, select
+from sqlalchemy.sql import exists
 from models import *
 
 
@@ -61,11 +62,12 @@ def get_notify_users(faces: int):                #получаем id по ко�
 
 #def find_user
 def create_users(faces, user_id):
+    exist = exists(bot_table).where(bot_table.c.face_from_user == faces, bot_table.c.user_id == user_id)
+    print(exist)
     with engine.begin() as conn:
-        exists = select(bot_table).where(bot_table.c.user_id == user_id, bot_table.c.faces == faces)
-        result = conn.execute(exists)
+        result = conn.execute(exist)
         print (result)
-        if result == None:
+        if result == False:
             conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})
             print(f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
     return faces, user_id

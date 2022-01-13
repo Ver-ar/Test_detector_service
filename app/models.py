@@ -17,7 +17,7 @@ image_table = Table ('image_table', meta,
 
 bot_table = Table ('bot_users', meta,
     Column('id', Integer, Sequence('user_id_seq'), primary_key=True),
-    Column('user_id', Integer, autoincrement=False),
+    Column('user_id', Integer, autoincrement=False, unique=True),
     Column('face_from_user', Integer, autoincrement=False)
     )
 
