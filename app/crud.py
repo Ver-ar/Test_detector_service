@@ -62,15 +62,22 @@ def get_notify_users(faces: int):                #получаем id по ко�
 
 #def find_user
 def create_users(faces, user_id):
-    exist = exists(bot_table).where(bot_table.c.face_from_user == faces, bot_table.c.user_id == user_id)
-    print(exist)
+    exist = bot_table.select().where(bot_table.c.face_from_user == faces, bot_table.c.user_id == user_id)
+    select_row = exists(exist).select()
+    
     with engine.begin() as conn:
-        result = conn.execute(exist)
-        print (result)
-        if result == False:
-            conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})
-            print(f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
-    return faces, user_id
+        result = conn.execute(select_row).fetchone()
+        
+        if result[0] == False:
+            create_users(faces, user_id)
+            return faces, user_id
+
+def create_users(faces, user_id):
+    print(faces, user_id)
+    with engine.begin() as conn:
+        conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})
+        print(f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
+        return faces, user_id
 
 
 

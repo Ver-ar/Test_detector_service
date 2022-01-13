@@ -13,6 +13,7 @@ import logging
 import asyncio
 app = FastAPI()
 
+
 storage = MemoryStorage() 
 bot = Bot(token=API_KEY)
 app.bot = bot

@@ -89,14 +89,12 @@ async def value_send_func_faces(message: types.Message, state: FSMContext):
     else:
         user_id = message.chat.id
         faces=int(message.text)
-        id_user_in_db = create_users(faces, user_id)
+        create_users(faces, user_id)
         #faces_in_db = get_notify_users(faces)
-        
-
-            
-        await message.reply(f"{id_user_in_db}")
-        #await message.reply(f"По этому запросу сейчас в базе ")
-        await state.finish()
+        print(faces, user_id)
+    await message.reply(f"'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}")
+    #await message.reply(f"По этому запросу сейчас в базе ")
+    await state.finish()
 
 ################################################
 
