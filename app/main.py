@@ -1,37 +1,45 @@
+from aiogram.types import message
 from fastapi import FastAPI, File, HTTPException, Path
 import uvicorn
 from detect_faces import detect
 from crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
 from models import *
 from aiogram import Bot
-from aiogram.dispatcher import Dispatcher
+from aiogram import Dispatcher
 from mytelegrambot.settings import API_KEY
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from mytelegrambot import handlers_
 import logging
 import asyncio
-
 app = FastAPI()
 
-#app.bot = bot
-    
+storage = MemoryStorage() 
+bot = Bot(token=API_KEY)
+app.bot = bot
+
 @app.on_event("startup")
 async def launch_bot():
-    bot = Bot(token=API_KEY)
-    storage = MemoryStorage()
+    #bot = Bot(token=API_KEY)
+    #storage = MemoryStorage()
     dp = Dispatcher(bot=bot, storage=storage)       
     logging.basicConfig(filename='bot.log', format='%(asctime)s-%(message)s', level=logging.DEBUG)
-    #logger = logging.getLogger(__name__)
+    #app.bot = bot
     handlers_.register_handlers_client(dp)
-    asyncio.create_task(dp.start_polling(dp,))
+    asyncio.create_task(dp.start_polling(dp))
    
 logger = logging.getLogger(__name__)
 
 
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
+    
     faces = detect(image)
-    item = create_image(faces=faces)    
+    item = create_image(faces=faces)
+    users_id = get_notify_users(faces=faces)
+    #20
+    # image_from_user_id = 
+    print(users_id)
+    #await bot.send_message(message.from_user.id, f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено")    
     return {"image_id" : item, "faces": faces}
   
 @app.get('/images/count/faces/{faces}')
@@ -68,4 +76,4 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         return {"delete image_id": image_id}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -57,6 +57,24 @@ def get_notify_users(faces: int):                #получаем id по ко�
         result_id = result.fetchall()
         print(f'id по этому кол-ву лиц: {result_id}')
         return result_id
+
+
+#def find_user
+def create_users(faces, user_id):
+    with engine.begin() as conn:
+        exists = select(bot_table).where(bot_table.c.user_id == user_id, bot_table.c.faces == faces)
+        result = conn.execute(exists)
+        print (result)
+        if result == None:
+            conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})
+            print(f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
+    return faces, user_id
+
+
+
+#def find_image_from_id(id: int):
+
+
 '''
 def compare_faces(faces: int):
     select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
