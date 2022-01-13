@@ -1,10 +1,11 @@
+#from curses import echo
 from sqlalchemy import Column, Integer, DateTime, MetaData, Sequence, create_engine
 import datetime
 from sqlalchemy.sql.schema import Table
 
 
 
-engine = create_engine('sqlite:///./my_database.db', pool_pre_ping=True)
+engine = create_engine('sqlite:///./my_database.db', pool_pre_ping=True, echo=True)
 
 meta = MetaData()
 

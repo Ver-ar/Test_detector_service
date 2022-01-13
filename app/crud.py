@@ -67,17 +67,18 @@ def create_users(faces, user_id):
     
     with engine.begin() as conn:
         result = conn.execute(select_row).fetchone()
-        
-        if result[0] == False:
-            create_users(faces, user_id)
-            return faces, user_id
+        print(result)
+        if result[0] == False:            
+            create_db_users(faces, user_id)            
+        else:
+            return(f'В базе уже есть это значение, попробуй ввести другое с командой /faces')
+    
+            
 
-def create_users(faces, user_id):
-    print(faces, user_id)
+def create_db_users(faces, user_id):    
     with engine.begin() as conn:
-        conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})
-        print(f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
-        return faces, user_id
+        conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})          
+    return (f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
 
 
 
