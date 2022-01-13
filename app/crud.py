@@ -69,17 +69,23 @@ def create_users(faces, user_id):
         result = conn.execute(select_row).fetchone()
         print(result)
         if result[0] == False:            
-            create_db_users(faces, user_id)            
+            with engine.connect() as conn:
+                ins = bot_table.insert().values(user_id = 'user_id', faces = 'faces')                
+                res = conn.execute(ins)   
+                print(res)
+                print(result)       
+                return (f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')            
         else:
             return(f'В базе уже есть это значение, попробуй ввести другое с командой /faces')
     
             
-
+'''
 def create_db_users(faces, user_id):    
-    with engine.begin() as conn:
-        conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})          
+    with engine.connect().execution_options(autocommit=True) as conn:
+        res = conn.execute(bot_table.insert(),{'user_id': user_id}, {'faces': faces})   
+        print(res)       
     return (f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')
-
+'''
 
 
 #def find_image_from_id(id: int):
