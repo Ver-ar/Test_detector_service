@@ -41,23 +41,6 @@ async def help_menu(message: types.Message):
             reply=False,
     )
 
-'''
-async def sendall(message: types.Message):
-    if message.chat.type == 'private':
-        if message.from_user.id == id_admin:
-            text = message.text[9:]
-            users = db.get_users()
-            for row in users:
-                try:
-                    await bot.send_message(row[0], text)
-                    if int(row[1]) != 1:
-                        db.set_active(row[0], 1)
-                except:
-                    db.set_active(row[0[, 0)
-            await bot.send_message(message.from_user.id, "Успешная рассылка")
-
-'''
-
 #@dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     await message.reply('Привет! С моей помощью ты можешь отслеживать состояние базы данных с определением количества лиц на фото. Вывести меню команд - /help')
@@ -76,8 +59,6 @@ async def view_all(message: types.Message):
 
 ################################################
 
-
-
 async def write_value_from_user(message: types.Message):
     await Track.faces.set()
     await message.reply("Введи количество лиц, которое ты хочешь отслеживать:")
@@ -90,23 +71,17 @@ async def value_send_func_faces(message: types.Message, state: FSMContext):
         user_id = message.chat.id
         faces=int(message.text)
         
-        #faces_in_db = get_notify_users(faces)
-        print(faces, user_id)
-        
     await message.reply(create_users(faces, user_id))
 
-    #await message.reply(f"По этому запросу сейчас в базе ")
     await state.finish()
 
 ################################################
 
-#@dp.message_handler(commands=['getface'])
 async def send_images_faces(message: types.Message):
     await Get.get_faces.set()
     await message.reply('Введи нужное количество лиц на фото:')
 
 
-#@dp.message_handler(lambda message: not message.text.isdigit(), state=Get.get_faces)
 async def value_send_func_getface(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         return await message.reply("Введи целое число:")
@@ -116,9 +91,8 @@ async def value_send_func_getface(message: types.Message, state: FSMContext):
     if len(photo_list) !=0: 
         await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
     else:
-        await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено")
+        await message.reply(f"Фото с таким количеством лиц не найдено, возможно оно еще не добавлено или удалено")
     await state.finish()         
-
 
 ################################################
 
@@ -172,7 +146,6 @@ def register_handlers_client(dp: Dispatcher):
 
     dp.register_message_handler(write_value_from_user, commands=['faces'],  state="*")
     dp.register_message_handler(value_send_func_faces, state = Track.faces)
-    #dp.register_message_handler(mailing, state = )
   
     dp.register_message_handler(send_images_faces, commands=['getface'],  state="*")
     dp.register_message_handler(value_send_func_getface, state = Get.get_faces)
