@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, HTTPException, Path
 import uvicorn
 from detect_faces import detect
-from crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
+from database_process.crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
 from aiogram import Bot
 from aiogram import Dispatcher
 from mytelegrambot.settings import API_KEY
