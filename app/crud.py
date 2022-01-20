@@ -1,6 +1,6 @@
-from sqlalchemy import func, select
+from sqlalchemy import func, select, insert
+from sqlalchemy.sql import exists
 from models import *
-
 
 
 def create_image(faces: int):    
@@ -35,7 +35,6 @@ def count_image_faces(faces: int):
         result_count = result.fetchone()                             
     return result_count[1]
 
-
 def get_image_from_faces (faces: int):
     select_image = select(image_table).where(image_table.c.faces == faces)
     with engine.begin() as conn: 
@@ -50,19 +49,27 @@ def get_db():
         result = conn.execute(select_image).fetchall()             
         return result
 
-def get_notify_users(faces: int):                #получаем id по кол-ву лиц, чтоб передать его в рез-т отправки сообщений ботом из таблицы фото по этому id
+def get_notify_users(faces: int):
     select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
     with engine.begin() as conn:
         result = conn.execute(select_image)
         result_id = result.fetchall()
-        print(f'id по этому кол-ву лиц: {result_id}')
-        return result_id
-'''
-def compare_faces(faces: int):
-    select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
+        list_users_id = []
+        for a in result_id:
+            list_users_id.append(a[1])
+        return list_users_id
+
+def create_users(faces, user_id):
+    exist = select(bot_table).where(bot_table.c.face_from_user == faces, bot_table.c.user_id == user_id)
+    print(exist)
+
     with engine.begin() as conn:
-        result = conn.execute(select_image)
-        result_image = result.fetchall()
-        print(f'Выбрано фото c количеством лиц: {result_image}')
-        return result_image
-'''
+        result = conn.execute(exist)
+        result_ex = result.fetchone()
+        if result_ex == None:
+            with engine.begin() as conn:    
+                res = conn.execute(bot_table.insert(),{'face_from_user': faces,'user_id': user_id})     
+                print(res)
+                return (f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')            
+        else:
+            return(f'В базе уже есть это значение, попробуй ввести другое с командой /faces')
