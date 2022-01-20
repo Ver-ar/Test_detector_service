@@ -5,11 +5,9 @@ from aiogram.types.message import ContentType
 from crud import get_image_from_faces, get_image, del_image, get_db, get_notify_users, create_users
 from detect_faces import *
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 
 conn = engine.connect()
-memory_storage = MemoryStorage()
 
 class Track(StatesGroup):
     faces = State()
@@ -26,7 +24,7 @@ class Del(StatesGroup):
 class GetID(StatesGroup):
     get_id = State()
 
-#@dp.message_handler(commands=['help'])
+#help
 async def help_menu(message: types.Message):
     await message.reply(
         text='''
@@ -41,7 +39,7 @@ async def help_menu(message: types.Message):
             reply=False,
     )
 
-#@dp.message_handler(commands=['start'])
+#start
 async def send_welcome(message: types.Message):
     await message.reply('Привет! С моей помощью ты можешь отслеживать состояние базы данных с определением количества лиц на фото. Вывести меню команд - /help')
     await help_menu(message=message)
@@ -50,19 +48,15 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
     await state.finish()
     await message.answer('Выполнение команды прервано')
 
-################################################
-
-#@dp.message_handler(commands=['view'])
+#view
 async def view_all(message: types.Message):
     photo_list = get_db()
     await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
 
-################################################
-
+#faces
 async def write_value_from_user(message: types.Message):
     await Track.faces.set()
     await message.reply("Введи количество лиц, которое ты хочешь отслеживать:")
-
 
 async def value_send_func_faces(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
@@ -75,12 +69,9 @@ async def value_send_func_faces(message: types.Message, state: FSMContext):
 
     await state.finish()
 
-################################################
-
 async def send_images_faces(message: types.Message):
     await Get.get_faces.set()
     await message.reply('Введи нужное количество лиц на фото:')
-
 
 async def value_send_func_getface(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
@@ -94,15 +85,11 @@ async def value_send_func_getface(message: types.Message, state: FSMContext):
         await message.reply(f"Фото с таким количеством лиц не найдено, возможно оно еще не добавлено или удалено")
     await state.finish()         
 
-################################################
-
-#@dp.message_handler(commands=['getid'])
+#getid
 async def send_images_id(message: types.Message):
     await GetID.get_id.set()
     await message.reply('Введи интересующий id фото:')
 
-
-#@dp.message_handler(lambda message: not message.text.isdigit(), state=GetID.get_id)
 async def value_send_func_getid(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         return await message.reply("Введи целое число:")
@@ -115,14 +102,11 @@ async def value_send_func_getid(message: types.Message, state: FSMContext):
             await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено")
         await state.finish()
 
-################################################
-
-#@dp.message_handler(commands=['del'])
+#del
 async def del_images(message: types.Message):    
     await message.reply('Введи нужный id:')
     await Del.del_id.set()
 
-#@dp.message_handler(lambda message: not message.text.isdigit(), state=Del.del_id)
 async def value_send_func_del(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         return await message.reply("Введи целое число:")
@@ -135,8 +119,7 @@ async def value_send_func_del(message: types.Message, state: FSMContext):
             await message.reply(f"Фото с таким id не найдено, возможно оно еще не добавлено или удалено") 
         await state.finish()
 
-###############################################
-#@dp.message_handler(content_types = ContentType.ANY)
+#ContentType.ANY
 async def unknown_message(message: types.Message):
     await message.answer("Ничего не понятно, но очень интересно:) Введи /help, чтоб посмотреть интересующую тебя команду")
 
@@ -161,6 +144,5 @@ def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(view_all, commands=['view'])
 
     dp.register_message_handler(cmd_cancel, commands=['cancel'], state="*")
-    #dp.register_message_handler(cmd_cancel, Text(equals="отмена", ignore_case=True), state="*")
 
     dp.register_message_handler(unknown_message, content_types = ContentType.ANY)

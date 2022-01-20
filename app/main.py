@@ -1,4 +1,3 @@
-from aiogram.types import message
 from fastapi import FastAPI, File, HTTPException, Path
 import uvicorn
 from detect_faces import detect
@@ -11,31 +10,30 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from mytelegrambot import handlers_
 import logging
 import asyncio
-from mytelegrambot.handlers_ import view_all
+
 app = FastAPI()
-
-
-storage = MemoryStorage() 
-bot = Bot(token=API_KEY)
-app.bot = bot
 
 @app.on_event("startup")
 async def launch_bot():
+    storage = MemoryStorage()     
+    bot = Bot(token=API_KEY)
+    app.bot = bot        
     dp = Dispatcher(bot=bot, storage=storage)       
     logging.basicConfig(filename='bot.log', format='%(asctime)s-%(message)s', level=logging.DEBUG)
     handlers_.register_handlers_client(dp)
     asyncio.create_task(dp.start_polling(dp))
-   
+    
 logger = logging.getLogger(__name__)
 
 
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
+
     faces = detect(image)
     item = create_image(faces=faces)
     users_id = get_notify_users(faces=faces)
     for ids in users_id:
-        await bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
+        await app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
     return {"image_id" : item, "faces": faces}
   
 @app.get('/images/count/faces/{faces}')
