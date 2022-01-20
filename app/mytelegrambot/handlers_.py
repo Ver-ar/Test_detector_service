@@ -1,13 +1,8 @@
 from aiogram import types
 from aiogram.dispatcher import Dispatcher, FSMContext
-from models import *
 from aiogram.types.message import ContentType
 from crud import get_image_from_faces, get_image, del_image, get_db, get_notify_users, create_users
-from detect_faces import *
 from aiogram.dispatcher.filters.state import State, StatesGroup
-
-
-conn = engine.connect()
 
 class Track(StatesGroup):
     faces = State()

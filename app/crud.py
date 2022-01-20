@@ -1,5 +1,5 @@
 from sqlalchemy import func, select
-from models import *
+from models import bot_table, image_table, engine
 
 
 def create_image(faces: int):    

@@ -1,4 +1,3 @@
-#from curses import echo
 from sqlalchemy import Column, Integer, DateTime, MetaData, Sequence, create_engine
 import datetime
 from sqlalchemy.sql.schema import Table
