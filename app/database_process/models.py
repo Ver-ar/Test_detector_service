@@ -4,7 +4,7 @@ from sqlalchemy.sql.schema import Table
 
 
 
-engine = create_engine('sqlite:///./my_database.db', pool_pre_ping=True, echo=True)
+engine = create_engine('sqlite:///./my_database.db', pool_pre_ping=True)
 
 meta = MetaData()
 
