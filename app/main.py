@@ -20,39 +20,37 @@ async def launch_bot():
     app.state.bot = bot        
     dp = Dispatcher(bot=bot, storage=storage)       
     handlers_.register_handlers_client(dp)
-    try:
-        asyncio.create_task(dp.start_polling(dp))
-    except RuntimeError:
-        pass
+    asyncio.create_task(dp.start_polling(dp))
+
 
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
 
 @app.on_event("shutdown")
-async def shutdown_event():
-    with open ('log.log', mode = "a") as log:
-        log.write ("Application shutdown")
+async def cancel_me():
+    try:
+        await asyncio.create_task
+        with open ('log.log', mode = "a") as log:
+            log.write ("Application shutdown")
+    except RuntimeError:
+        pass
 
 
 @app.post('/images/')
 
-async def create_item(image: bytes = File(...)) -> dict:
-    faces = detect(image)
-    item = create_image(faces=faces)
-    
-    return {"image_id" : item, "faces": faces}
-  
+async def create_item(image: bytes = File(...)) -> dict: #принимает картинку, переводит в байты
+    faces = detect(image)#находит кол-во лиц
+    item = create_image(faces=faces) #отправляет в базу картинку и кол-во лиц
+    return faces, item #возвращает кол-во лиц и item
+
 async def send_message(faces, item):
     users_id = get_notify_users(faces=faces)
     for ids in users_id:
         await app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
 
-tasks = [
-    create_item(),
-    send_message()
-]
-
-await asyncio.gather(*tasks)
+async def post_data(image, faces, item):
+    await asyncio.gather(create_item(image), send_message(faces, item))
+    return {"image_id" : item, "faces": faces}
 
 @app.get('/images/count/faces/{faces}')
 async def count_item_faces(faces: int = Path(..., title="The faces on the image to get"))-> dict:
@@ -88,7 +86,5 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         return {"delete image_id": image_id}
 
 if __name__ == "__main__":
-    try:
-        uvicorn.run(app, host="0.0.0.0", port=8080)
-    except Exception as e:
-        print("End")
+    uvicorn.run(app, host="0.0.0.0", port=8080)
+
