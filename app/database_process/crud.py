@@ -60,14 +60,12 @@ def get_notify_users(faces: int):
 
 def create_users(faces, user_id):
     exist = select(bot_table).where(bot_table.c.face_from_user == faces, bot_table.c.user_id == user_id)
-    print(exist)
 
     with engine.begin() as conn:
         result = conn.execute(exist)
         result_ex = result.fetchone()
         if result_ex == None:
-            res = conn.execute(bot_table.insert(),{'face_from_user': faces,'user_id': user_id})     
-            print(res)
+            conn.execute(bot_table.insert(),{'face_from_user': faces,'user_id': user_id})     
             return (f'В базу бота внесены новые данные:user_id: {user_id} и количество отслеживаемых лиц: {faces}')            
         else:
             return(f'В базе уже есть это значение, попробуй ввести другое с командой /faces')
