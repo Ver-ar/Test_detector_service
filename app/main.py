@@ -12,29 +12,48 @@ import asyncio
 
 app = FastAPI()
 
+
 @app.on_event("startup")
 async def launch_bot():
     storage = MemoryStorage()     
     bot = Bot(token=API_KEY)
-    app.bot = bot        
+    app.state.bot = bot        
     dp = Dispatcher(bot=bot, storage=storage)       
-    logging.basicConfig(filename='bot.log', format='%(asctime)s-%(message)s', level=logging.DEBUG)
     handlers_.register_handlers_client(dp)
-    asyncio.create_task(dp.start_polling(dp))
-    
-logger = logging.getLogger(__name__)
+    try:
+        asyncio.create_task(dp.start_polling(dp))
+    except RuntimeError:
+        pass
+
+logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
+logger = logging.getLogger()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    with open ('log.log', mode = "a") as log:
+        log.write ("Application shutdown")
 
 
 @app.post('/images/')
-async def create_item(image: bytes = File(...)) -> dict:
 
+async def create_item(image: bytes = File(...)) -> dict:
     faces = detect(image)
     item = create_image(faces=faces)
+    
+    return {"image_id" : item, "faces": faces}
+  
+async def send_message(faces, item):
     users_id = get_notify_users(faces=faces)
     for ids in users_id:
         await app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
-    return {"image_id" : item, "faces": faces}
-  
+
+tasks = [
+    create_item(),
+    send_message()
+]
+
+await asyncio.gather(*tasks)
+
 @app.get('/images/count/faces/{faces}')
 async def count_item_faces(faces: int = Path(..., title="The faces on the image to get"))-> dict:
     db_image = count_image_faces(faces = faces)
@@ -69,4 +88,7 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         return {"delete image_id": image_id}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    try:
+        uvicorn.run(app, host="0.0.0.0", port=8080)
+    except Exception as e:
+        print("End")
