@@ -1,10 +1,12 @@
-from sqlalchemy import Column, Integer, DateTime, MetaData, Sequence, create_engine
+#import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import Column, Integer, DateTime, MetaData, Sequence #, create_engine
 import datetime
 from sqlalchemy.sql.schema import Table
 
 
 
-engine = create_engine('sqlite:///./my_database.db', pool_pre_ping=True)
+engine = create_async_engine('sqlite:///./my_database.db', pool_pre_ping=True)
 
 meta = MetaData()
 
