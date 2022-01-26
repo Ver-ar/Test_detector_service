@@ -22,7 +22,6 @@ async def launch_bot():
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
-
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
 
