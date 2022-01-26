@@ -37,6 +37,17 @@ async def cancel_me():
             log.write ("Application shutdown")         
 
 
+@app.on_event("shutdown")
+async def cancel_me():
+    try:
+        app.state.polling_task.cancel()
+    except asyncio.CancelledError:
+        raise
+    finally:
+        with open ('log.log', mode = "a") as log:
+            log.write ("Application shutdown")       
+
+
 @app.post('/images/')
 
 async def create_item(image: bytes = File(...)) -> dict:
