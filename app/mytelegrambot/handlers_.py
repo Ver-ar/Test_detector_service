@@ -1,13 +1,8 @@
 from aiogram import types
 from aiogram.dispatcher import Dispatcher, FSMContext
-from models import *
 from aiogram.types.message import ContentType
-from crud import get_image_from_faces, get_image, del_image, get_db, get_notify_users, create_users
-from detect_faces import *
+from database_process import crud
 from aiogram.dispatcher.filters.state import State, StatesGroup
-
-
-conn = engine.connect()
 
 class Track(StatesGroup):
     faces = State()
@@ -50,7 +45,7 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
 
 #view
 async def view_all(message: types.Message):
-    photo_list = get_db()
+    photo_list = crud.get_db()
     await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
 
 #faces
@@ -65,7 +60,7 @@ async def value_send_func_faces(message: types.Message, state: FSMContext):
         user_id = message.chat.id
         faces=int(message.text)
         
-    await message.reply(create_users(faces, user_id))
+    await message.reply(crud.create_users(faces, user_id))
 
     await state.finish()
 
@@ -78,7 +73,7 @@ async def value_send_func_getface(message: types.Message, state: FSMContext):
         return await message.reply("Введи целое число:")
     else:
         faces=int(message.text)
-        photo_list = get_image_from_faces(faces)
+        photo_list = crud.get_image_from_faces(faces)
     if len(photo_list) !=0: 
         await message.reply("\n".join(f'id: {a[0]}, количество лиц: {a[1]}, дата и время: {a[2]}' for a in photo_list))
     else:
@@ -95,7 +90,7 @@ async def value_send_func_getid(message: types.Message, state: FSMContext):
         return await message.reply("Введи целое число:")
     else:
         id_image=int(message.text)
-        a = get_image(id_image) 
+        a = crud.get_image(id_image) 
         if a is not None:
             await message.reply(f"id: {a[0]}, количество лиц: {a[1]}")
         else:
@@ -112,7 +107,7 @@ async def value_send_func_del(message: types.Message, state: FSMContext):
         return await message.reply("Введи целое число:")
     else:
         id_image=int(message.text)
-        a = del_image(id_image)    
+        a = crud.del_image(id_image)    
         if a is not None: 
             await message.reply(f"Удалено фото с id: {id_image}") 
         else: 
