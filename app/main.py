@@ -23,6 +23,17 @@ async def launch_bot():
     asyncio.create_task(dp.start_polling(dp))
 
 
+
+@app.on_event("shutdown")
+async def cancel_me():
+    try:
+        app.state.polling_task.cancel()
+    except asyncio.CancelledError:
+        raise
+    finally:
+        with open ('log.log', mode = "a") as log:
+            log.write ("Application shutdown")       
+
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
 
