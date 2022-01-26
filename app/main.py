@@ -26,16 +26,6 @@ async def launch_bot():
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
 
-@app.on_event("shutdown")
-async def cancel_me():
-    try:
-        app.state.polling_task.cancel()
-    except asyncio.CancelledError:
-        raise
-    finally:
-        with open ('log.log', mode = "a") as log:
-            log.write ("Application shutdown")         
-
 
 @app.post('/images/')
 
