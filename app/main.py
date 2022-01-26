@@ -26,7 +26,6 @@ async def launch_bot():
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
 
-
 @app.post('/images/')
 
 async def create_item(image: bytes = File(...)) -> dict:
