@@ -20,7 +20,7 @@ async def launch_bot():
     app.state.bot = bot        
     dp = Dispatcher(bot=bot, storage=storage)       
     handlers_.register_handlers_client(dp)
-    asyncio.create_task(dp.start_polling(dp))
+    app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
 
 
@@ -37,15 +37,6 @@ async def cancel_me():
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
 
-@app.on_event("shutdown")
-async def cancel_me():
-    try:
-        await asyncio.create_task
-        with open ('log.log', mode = "a") as log:
-            log.write ("Application shutdown")
-    except RuntimeError:
-        pass
-
 
 @app.post('/images/')
 
@@ -56,6 +47,7 @@ async def create_item(image: bytes = File(...)) -> dict: #принимает к�
 
 async def send_message(faces, item):
     users_id = get_notify_users(faces=faces)
+    
     for ids in users_id:
         await app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
 
