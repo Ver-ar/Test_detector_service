@@ -10,14 +10,20 @@ from mytelegrambot import handlers_
 import logging
 import asyncio
 
+
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 app = FastAPI()
+
+logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
+logger = logging.getLogger()
 
 
 @app.on_event("startup")
 async def launch_bot():
     storage = MemoryStorage()     
     bot = Bot(token=API_KEY)
-    app.state.bot = bot        
+    app.bot = bot        
     dp = Dispatcher(bot=bot, storage=storage)       
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
@@ -27,18 +33,14 @@ async def launch_bot():
 async def cancel_me():
     try:
         app.state.polling_task.cancel()
+    
     except asyncio.CancelledError:
         raise
     finally:
         with open ('log.log', mode = "a") as log:
             log.write ("Application shutdown")       
 
-logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
-logger = logging.getLogger()
-
-
 @app.post('/images/')
-
 async def create_item(image: bytes = File(...)) -> dict:
     faces = detect(image)
     item = create_image(faces=faces)
@@ -81,5 +83,5 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         return {"delete image_id": image_id}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8080, loop = "asyncio")
 
