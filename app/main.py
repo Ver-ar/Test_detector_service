@@ -41,9 +41,8 @@ async def cancel_me():
 async def create_item(image: bytes = File(...)) -> dict:
     faces = detect(image)
     item = create_image(faces=faces)
-    users_id = get_notify_users(faces=faces)   
-    for ids in users_id:
-        await app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
+    users_id = get_notify_users(faces=faces)
+    await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])  
     return {"image_id" : item, "faces": faces}
 
 @app.get('/images/count/faces/{faces}')
