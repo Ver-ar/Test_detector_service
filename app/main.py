@@ -23,7 +23,6 @@ async def launch_bot():
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
 
-
 @app.on_event("shutdown")
 async def cancel_me():
     try:
@@ -40,19 +39,12 @@ logger = logging.getLogger()
 
 @app.post('/images/')
 
-async def create_item(image: bytes = File(...)) -> dict: #принимает картинку, переводит в байты
-    faces = detect(image)#находит кол-во лиц
-    item = create_image(faces=faces) #отправляет в базу картинку и кол-во лиц
-    return faces, item #возвращает кол-во лиц и item
-
-async def send_message(faces, item):
-    users_id = get_notify_users(faces=faces)
-    
+async def create_item(image: bytes = File(...)) -> dict:
+    faces = detect(image)
+    item = create_image(faces=faces)
+    users_id = get_notify_users(faces=faces)   
     for ids in users_id:
         await app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
-
-async def post_data(image, faces, item):
-    await asyncio.gather(create_item(image), send_message(faces, item))
     return {"image_id" : item, "faces": faces}
 
 @app.get('/images/count/faces/{faces}')
