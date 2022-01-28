@@ -11,6 +11,8 @@ import logging
 import asyncio
 import concurrent.futures
 
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 app = FastAPI()
 
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
@@ -78,4 +80,4 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         return {"delete image_id": image_id}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8080, loop = "asyncio")
