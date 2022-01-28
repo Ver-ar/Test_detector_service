@@ -1,6 +1,8 @@
+from async_timeout import asyncio
 import cv2
 import numpy as np
-
+import concurrent.futures
+import asyncio
 
 def detect(img):
         
@@ -14,3 +16,13 @@ def detect(img):
     faces = face_cascade.detectMultiScale(gray, 1.1, 7)
    
     return len(faces)
+
+async def main():
+    loop = asyncio.get_running_loop()
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        result = await loop.run_in_executor(pool, detect)
+        print(result)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
