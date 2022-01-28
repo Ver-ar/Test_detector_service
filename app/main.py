@@ -18,6 +18,7 @@ app = FastAPI()
 logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
 
+
 @app.on_event("startup")
 async def launch_bot():
     storage = MemoryStorage()     
@@ -27,24 +28,24 @@ async def launch_bot():
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
+
 @app.on_event("shutdown")
 async def cancel_me():
     try:
         app.state.polling_task.cancel()    
     finally:
         with open ('log.log', mode = "a") as log:
-            log.write ("Application shutdown")  
-
+            log.write ("Application shutdown")       
 
 @app.post('/images/')
-
 async def create_item(image: bytes = File(...)) -> dict:
-    faces = detect(image)
+    loop = asyncio.get_running_loop()
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        faces = await loop.run_in_executor(pool, detect, image)
     item = create_image(faces=faces)
     users_id = get_notify_users(faces=faces)
-    await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])
+    await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])  
     return {"image_id" : item, "faces": faces}
-
 
 @app.get('/images/count/faces/{faces}')
 async def count_item_faces(faces: int = Path(..., title="The faces on the image to get"))-> dict:
