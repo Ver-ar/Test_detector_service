@@ -9,9 +9,12 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from mytelegrambot import handlers_
 import logging
 import asyncio
+import concurrent.futures
 
 app = FastAPI()
 
+logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
+logger = logging.getLogger()
 
 @app.on_event("startup")
 async def launch_bot():
@@ -22,18 +25,22 @@ async def launch_bot():
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
-logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
-logger = logging.getLogger()
+@app.on_event("shutdown")
+async def cancel_me():
+    try:
+        app.state.polling_task.cancel()    
+    finally:
+        with open ('log.log', mode = "a") as log:
+            log.write ("Application shutdown")  
+
 
 @app.post('/images/')
 
 async def create_item(image: bytes = File(...)) -> dict:
     faces = detect(image)
     item = create_image(faces=faces)
-
     users_id = get_notify_users(faces=faces)
-    for ids in users_id:
-        await app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}")
+    await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])
     return {"image_id" : item, "faces": faces}
 
 
@@ -72,4 +79,3 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
-
