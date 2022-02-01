@@ -44,6 +44,10 @@ async def cancel_me():
         with open ('log.log', mode = "a") as log:
             log.write ("Application shutdown")       
 
+@app.on_event("shutdown")
+async def close_db():
+    await engine.dispose()
+
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
     loop = asyncio.get_running_loop()
@@ -88,4 +92,4 @@ async def del_item(image_id: int = Path(..., gt=0))-> dict:
         return {"delete image_id": image_id}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080, loop = "asyncio")
+    uvicorn.run(app, host="0.0.0.0", port=8000, loop = "asyncio")
