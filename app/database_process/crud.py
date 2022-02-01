@@ -1,6 +1,5 @@
 from sqlalchemy import func, select
 from database_process.models import bot_table, image_table, engine
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection, AsyncEngine
 from log import logger
 
 
@@ -10,7 +9,7 @@ async def create_image(faces: int):
         logger.info(f'Add image with id: {result[0]}')
     return result[0]
 
-async def get_image (id: int):
+async def get_image_with_id(id: int):
     select_image = select(image_table).where(image_table.c.id == id)
     async with engine.begin() as conn: 
         result = await conn.execute(select_image)
@@ -21,10 +20,10 @@ async def get_image (id: int):
 async def del_image(id: int):    
     result_del = image_table.delete().where(image_table.c.id == id)
     async with engine.begin() as conn:
-        result = await conn.execute(result_del)
-        if result.rowcount == 1:
+        result_image = await conn.execute(result_del)
+        if result_image.rowcount == 1:
             logger.info(f'Delete image with id: {id}')
-            return result
+            return result_image
         else:
             return
    
@@ -34,9 +33,9 @@ async def count_image_faces(faces: int):
     async with engine.begin() as conn:
         result = await conn.execute(select_count)
         result_count = result.fetchone()                             
-    return result_count[1]
+    return result_count[0]
 
-async def get_image_from_faces (faces: int):
+async def get_image_from_faces(faces: int):
     select_image = select(image_table).where(image_table.c.faces == faces)
     async with engine.begin() as conn: 
         result = await conn.execute(select_image)

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, HTTPException, Path
 import uvicorn
 from detect_faces import detect
-from database_process.crud import count_image_faces, create_image, get_image, del_image, get_db, get_notify_users
+from database_process.crud import count_image_faces, create_image, get_image_with_id, del_image, get_db, get_notify_users
 from aiogram import Bot
 from aiogram import Dispatcher
 from mytelegrambot.settings import API_KEY
@@ -46,38 +46,38 @@ async def create_item(image: bytes = File(...)) -> dict:
         faces = await loop.run_in_executor(pool, detect, image)
     item = await create_image(faces=faces)
     users_id = await get_notify_users(faces=faces)
-    await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])  
+    await asyncio.gather(*[app.bot.send_message(id, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for id in users_id])  
     return {"image_id" : item, "faces": faces}
 
 @app.get('/images/count/faces/{faces}')
 async def count_item_faces(faces: int = Path(..., title="The faces on the image to get"))-> dict:
-    db_image = count_image_faces(faces = faces)
-    if db_image == None:
+    images_db = await count_image_faces(faces = faces)
+    if images_db == None:
         raise HTTPException(status_code=404, detail="Image not found")
     else:
-        return {"Фото с таким количеством лиц": db_image}
+        return {"Фото с таким количеством лиц": images_db}
 
 @app.get('/images/{image_id}')
 async def get_item(image_id: int = Path(..., gt=0))-> dict:
-    db_image = await get_image(id=image_id)
-    if db_image is None:
+    images_db = await get_image_with_id(id=image_id)
+    if images_db is None:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
-        return db_image
+        return images_db
 
 @app.get('/images/all/')
 async def get_items():
-    db_image = await get_db()
-    if len(db_image) == 0:
+    images_db = await get_db()
+    if len(images_db) == 0:
         raise HTTPException(status_code=404, detail="Table empty")
     else:
-        return db_image
+        return images_db
 
 
 @app.delete('/images/{image_id}')
 async def del_item(image_id: int = Path(..., gt=0))-> dict:
-    db_image = await del_image(id=image_id)
-    if not db_image:
+    images_db = await del_image(id=image_id)
+    if not images_db:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
         return {"delete image_id": image_id}
