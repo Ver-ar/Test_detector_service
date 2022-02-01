@@ -10,6 +10,8 @@ from mytelegrambot import handlers_
 import logging
 import asyncio
 import concurrent.futures
+from sqlalchemy.ext.asyncio import AsyncSession
+from database_process.models import engine, meta
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -28,6 +30,11 @@ async def launch_bot():
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
+@app.on_event("startup")
+async def create_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(meta.create_all)
+
 
 @app.on_event("shutdown")
 async def cancel_me():
@@ -37,13 +44,17 @@ async def cancel_me():
         with open ('log.log', mode = "a") as log:
             log.write ("Application shutdown")       
 
+@app.on_event("shutdown")
+async def close_db():
+    await engine.dispose()
+
 @app.post('/images/')
 async def create_item(image: bytes = File(...)) -> dict:
     loop = asyncio.get_running_loop()
     with concurrent.futures.ProcessPoolExecutor() as pool:
         faces = await loop.run_in_executor(pool, detect, image)
-    item = create_image(faces=faces)
-    users_id = get_notify_users(faces=faces)
+    item = await create_image(faces=faces)
+    users_id = await get_notify_users(faces=faces)
     await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])  
     return {"image_id" : item, "faces": faces}
 
@@ -57,7 +68,7 @@ async def count_item_faces(faces: int = Path(..., title="The faces on the image 
 
 @app.get('/images/{image_id}')
 async def get_item(image_id: int = Path(..., gt=0))-> dict:
-    db_image = get_image(id=image_id)
+    db_image = await get_image(id=image_id)
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
@@ -65,7 +76,7 @@ async def get_item(image_id: int = Path(..., gt=0))-> dict:
 
 @app.get('/images/all/')
 async def get_items():
-    db_image = get_db()
+    db_image = await get_db()
     if len(db_image) == 0:
         raise HTTPException(status_code=404, detail="Table empty")
     else:
@@ -74,11 +85,11 @@ async def get_items():
 
 @app.delete('/images/{image_id}')
 async def del_item(image_id: int = Path(..., gt=0))-> dict:
-    db_image = del_image(id=image_id)
+    db_image = await del_image(id=image_id)
     if not db_image:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
         return {"delete image_id": image_id}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080, loop = "asyncio")
+    uvicorn.run(app, host="0.0.0.0", port=8000, loop = "asyncio")
