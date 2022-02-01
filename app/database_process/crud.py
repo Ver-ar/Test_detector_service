@@ -45,9 +45,8 @@ async def get_image_from_faces (faces: int):
 async def get_db():
     select_image = select([image_table])
     async with engine.begin() as conn: 
-        result = await conn.execute(select_image)
-        result_async = result.fetchall()   
-        return result_async
+        result = (await conn.execute(select_image)).fetchall()
+        return result
 
 async def get_notify_users(faces: int):
     select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
