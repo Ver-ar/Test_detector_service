@@ -29,7 +29,6 @@ async def launch_bot():
     dp = Dispatcher(bot=bot, storage=storage)       
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
-
     async with engine.begin() as conn:
         await conn.run_sync(meta.create_all)
 
@@ -48,10 +47,7 @@ async def create_item(image: bytes = File(...)) -> dict:
     with concurrent.futures.ProcessPoolExecutor() as pool:
         faces = await loop.run_in_executor(pool, detect, image)
     item = await create_image(faces=faces)
-    
-
-    users_id = get_notify_users(faces=faces)
-    print(users_id)
+    users_id = await get_notify_users(faces=faces)
     await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])  
     return {"image_id" : item, "faces": faces}
 
@@ -65,7 +61,7 @@ async def count_item_faces(faces: int = Path(..., title="The faces on the image 
 
 @app.get('/images/{image_id}')
 async def get_item(image_id: int = Path(..., gt=0))-> dict:
-    db_image = get_image(id=image_id)
+    db_image = await get_image(id=image_id)
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
@@ -73,7 +69,7 @@ async def get_item(image_id: int = Path(..., gt=0))-> dict:
 
 @app.get('/images/all/')
 async def get_items():
-    db_image = get_db()
+    db_image = await get_db()
     if len(db_image) == 0:
         raise HTTPException(status_code=404, detail="Table empty")
     else:
@@ -82,7 +78,7 @@ async def get_items():
 
 @app.delete('/images/{image_id}')
 async def del_item(image_id: int = Path(..., gt=0))-> dict:
-    db_image = del_image(id=image_id)
+    db_image = await del_image(id=image_id)
     if not db_image:
         raise HTTPException(status_code=404, detail="Image not found, id was be deleted")
     else:
