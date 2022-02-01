@@ -51,12 +51,9 @@ async def get_db():
 async def get_notify_users(faces: int):
     select_image = select(bot_table).where(bot_table.c.face_from_user == faces)
     async with engine.begin() as conn:
-        result = await conn.execute(select_image)
-        result_id = result.fetchall()
-        list_users_id = []
-        for a in result_id:
-            list_users_id.append(a[1])
-        return list_users_id
+        result = (await conn.execute(select_image)).fetchall()
+        result = [(user_id[1]) for user_id in result]
+        return result
 
 async def create_users(faces, user_id):
     exist = select(bot_table).where(bot_table.c.face_from_user == faces, bot_table.c.user_id == user_id)
