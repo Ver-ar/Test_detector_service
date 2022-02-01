@@ -1,10 +1,8 @@
-from sqlalchemy import Column, Integer, DateTime, MetaData, Sequence, create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncConnection, AsyncEngine
+from sqlalchemy import Column, Integer, DateTime, MetaData, Sequence
 import datetime
 from sqlalchemy.sql.schema import Table
 
-
-
-engine = create_engine('sqlite:///./my_database.db', pool_pre_ping=True)
 
 meta = MetaData()
 
@@ -21,6 +19,4 @@ bot_table = Table ('bot_users', meta,
     Column('face_from_user', Integer, autoincrement=False)
     )
 
-
-
-meta.create_all(engine)
+engine = create_async_engine('sqlite+aiosqlite:///./my_database.db', pool_pre_ping=True)

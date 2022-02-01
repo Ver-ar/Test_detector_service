@@ -10,6 +10,8 @@ from mytelegrambot import handlers_
 import logging
 import asyncio
 import concurrent.futures
+from sqlalchemy.ext.asyncio import AsyncSession
+from database_process.models import engine, meta
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -28,6 +30,9 @@ async def launch_bot():
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
+    async with engine.begin() as conn:
+        await conn.run_sync(meta.create_all)
+
 
 @app.on_event("shutdown")
 async def cancel_me():
@@ -42,8 +47,11 @@ async def create_item(image: bytes = File(...)) -> dict:
     loop = asyncio.get_running_loop()
     with concurrent.futures.ProcessPoolExecutor() as pool:
         faces = await loop.run_in_executor(pool, detect, image)
-    item = create_image(faces=faces)
+    item = await create_image(faces=faces)
+    
+
     users_id = get_notify_users(faces=faces)
+    print(users_id)
     await asyncio.gather(*[app.bot.send_message(ids, f"В базу добавлено фото с id: {item}, количество лиц: {faces}") for ids in users_id])  
     return {"image_id" : item, "faces": faces}
 
