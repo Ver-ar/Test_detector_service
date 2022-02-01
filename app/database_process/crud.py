@@ -1,11 +1,13 @@
 from sqlalchemy import func, select
 from database_process.models import bot_table, image_table, engine
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection, AsyncEngine
+from log import logger
+
 
 async def create_image(faces: int):    
     async with engine.begin() as conn:            
         result = (await conn.execute(image_table.insert(),{"faces": faces})).inserted_primary_key
-        print(f'В базу добавлено фото c id: {result[0]}')
+        logger.info(f'Add image with id: {result[0]}')
     return result[0]
 
 async def get_image (id: int):
@@ -13,7 +15,7 @@ async def get_image (id: int):
     async with engine.begin() as conn: 
         result = await conn.execute(select_image)
         result_image = result.fetchone() 
-        print(f'Выбрано фото c id: {result_image}')
+        logger.info(f'Select image with id: {result_image}')
         return result_image
 
 async def del_image(id: int):    
@@ -21,7 +23,7 @@ async def del_image(id: int):
     async with engine.begin() as conn:
         result = await conn.execute(result_del)
         if result.rowcount == 1:
-            print(f'Удалено фото c id: {id}')
+            logger.info(f'Delete image with id: {id}')
             return result
         else:
             return
@@ -39,7 +41,7 @@ async def get_image_from_faces (faces: int):
     async with engine.begin() as conn: 
         result = await conn.execute(select_image)
         result_image = result.fetchall() 
-        print(f'Выбрано фото c количеством лиц: {result_image}')
+        logger.info(f'Select image with faces: {result_image}')
         return result_image
 
 async def get_db():
