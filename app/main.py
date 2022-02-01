@@ -29,6 +29,9 @@ async def launch_bot():
     dp = Dispatcher(bot=bot, storage=storage)       
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
+
+@app.on_event("startup")
+async def create_db():
     async with engine.begin() as conn:
         await conn.run_sync(meta.create_all)
 
