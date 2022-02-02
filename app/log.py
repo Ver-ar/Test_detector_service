@@ -1,19 +1,20 @@
 import logging
 import sys
 
-logger = logging.getLogger()
-logger.setLevel(logging.WARNING)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-
-logging.getLogger('uvicorn').setLevel('WARNING')
-logging.getLogger('aiogram').setLevel('WARNING')
-logging.getLogger('sqlalchemy').setLevel('WARNING')
-logging.getLogger('aiosqlite').setLevel('WARNING')
+logger = logging.getLogger('app')
+logger.setLevel(logging.INFO)
 
 sh = logging.StreamHandler(sys.stdout)
+sh.setLevel(logging.WARNING)
+
 fh = logging.FileHandler('log.log')
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setLevel(logging.DEBUG)
+
+
 fh.setFormatter(formatter)
 sh.setFormatter(formatter)
+
 logger.addHandler(fh)
 logger.addHandler(sh)

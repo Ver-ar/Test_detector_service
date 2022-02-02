@@ -3,7 +3,6 @@ from database_process.models import bot_table, image_table, engine
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection, AsyncEngine
 from log import logger
 
-
 async def create_image(faces: int):    
     async with engine.begin() as conn:            
         result = (await conn.execute(image_table.insert(),{"faces": faces})).inserted_primary_key
