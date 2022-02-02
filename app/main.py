@@ -7,19 +7,13 @@ from aiogram import Dispatcher
 from mytelegrambot.settings import API_KEY
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from mytelegrambot import handlers_
-import logging
 import asyncio
 import concurrent.futures
-from sqlalchemy.ext.asyncio import AsyncSession
 from database_process.models import engine, meta
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 app = FastAPI()
-
-logging.basicConfig(filename = 'log.log', format = '%(asctime)s-%(message)s', level=logging.DEBUG)
-logger = logging.getLogger()
-
 
 @app.on_event("startup")
 async def launch_bot():
@@ -38,11 +32,8 @@ async def create_db():
 
 @app.on_event("shutdown")
 async def cancel_me():
-    try:
-        app.state.polling_task.cancel()    
-    finally:
-        with open ('log.log', mode = "a") as log:
-            log.write ("Application shutdown")       
+    app.state.polling_task.cancel()    
+     
 
 @app.on_event("shutdown")
 async def close_db():
