@@ -18,7 +18,7 @@ import asyncio
 import concurrent.futures
 from database_process.models import engine, meta
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+#asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 app = FastAPI()
 
@@ -32,12 +32,12 @@ async def launch_bot():
     handlers_.register_handlers_client(dp)
     app.state.polling_task = asyncio.create_task(dp.start_polling(dp))
 
-
+'''
 @app.on_event("startup")
 async def create_db():
     async with engine.begin() as conn:
         await conn.run_sync(meta.create_all)
-
+'''
 
 @app.on_event("shutdown")
 async def cancel_me():
